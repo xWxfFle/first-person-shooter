@@ -7,7 +7,9 @@ Title: Animated Rifle
 */
 
 import { useAnimations, useGLTF } from '@react-three/drei'
-import { useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { RigidBody } from '@react-three/rapier'
+import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { GLTF } from 'three-stdlib'
 
@@ -44,140 +46,128 @@ export const Rifle = (props: JSX.IntrinsicElements['group']) => {
     '/animated_rifle.glb',
   ) as GLTFResult
   const { actions } = useAnimations(animations, group)
+  useFrame((state) => {
+    // group.current!.lookAt(
+    //   new THREE.Vector3().addVectors(
+    //     state.camera.position,
+    //     state.camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1),
+    //   ),
+    // )
+    state.camera.getWorldDirection(group.current!.position)
+    group.current!.position.addScaledVector(group.current!.position, -5.5)
+    // group.current!.position.copy(state.camera.position)
+    // group.current!.position.y -= 3.5
+
+    group.current!.rotation.copy(state.camera.rotation)
+  })
+  useEffect(() => {
+    if (!actions['Armature|Watch']) return
+    actions['Armature|Watch'].play().fadeIn(0.5)
+  }, [actions])
   return (
-    <group ref={group} {...props} dispose={null}>
-      <group name="Sketchfab_Scene">
-        <group name="Sketchfab_model" rotation={[-Math.PI / 2, 0, 0]}>
+    <RigidBody type="fixed" colliders="trimesh">
+      <group ref={group} {...props} dispose={null} scale={0.001}>
+        <group rotation={[0, Math.PI, 0]} position={[0, -3400, 0]}>
+          <group name="sleeve" rotation={[-Math.PI / 2, 0, 0]} scale={100} />
           <group
-            name="3c484c0dd9e54c678233e09dd3f008e4fbx"
-            rotation={[Math.PI / 2, 0, 0]}
-            scale={0.01}
-          >
-            <group name="Object_2">
-              <group name="RootNode">
-                <group
-                  name="sleeve"
-                  rotation={[-Math.PI / 2, 0, 0]}
-                  scale={100}
-                />
-                <group
-                  name="hardknuckle"
-                  rotation={[-Math.PI / 2, 0, 0]}
-                  scale={100}
-                />
-                <group
-                  name="shape_pose"
-                  rotation={[-Math.PI / 2, 0, 0]}
-                  scale={100}
-                >
-                  <mesh
-                    name="shape_pose__0"
-                    castShadow
-                    receiveShadow
-                    geometry={nodes.shape_pose__0.geometry}
-                    material={materials.shape_pose__0}
-                  />
-                </group>
-                <group
-                  name="Armature"
-                  rotation={[-Math.PI / 2, 0, 0]}
-                  scale={1142.4}
-                >
-                  <group name="Object_9">
-                    <primitive object={nodes._rootJoint} />
-                    <skinnedMesh
-                      name="Object_12"
-                      geometry={nodes.Object_12.geometry}
-                      material={materials.sleeve_st6_generalist}
-                      skeleton={nodes.Object_12.skeleton}
-                    />
-                    <skinnedMesh
-                      name="Object_14"
-                      geometry={nodes.Object_14.geometry}
-                      material={materials.glove_hardknuckle}
-                      skeleton={nodes.Object_14.skeleton}
-                    />
-                    <skinnedMesh
-                      name="Object_106"
-                      geometry={nodes.Object_106.geometry}
-                      material={materials.lambert1}
-                      skeleton={nodes.Object_106.skeleton}
-                    />
-                    <skinnedMesh
-                      name="Object_108"
-                      geometry={nodes.Object_108.geometry}
-                      material={materials.lambert1}
-                      skeleton={nodes.Object_108.skeleton}
-                    />
-                    <skinnedMesh
-                      name="Object_110"
-                      geometry={nodes.Object_110.geometry}
-                      material={materials.lambert1}
-                      skeleton={nodes.Object_110.skeleton}
-                    />
-                    <group
-                      name="Object_11"
-                      rotation={[-Math.PI / 2, 0, 0]}
-                      scale={100}
-                    />
-                    <group
-                      name="Object_13"
-                      rotation={[-Math.PI / 2, 0, 0]}
-                      scale={100}
-                    />
-                    <group
-                      name="Object_105"
-                      position={[0, 3624.28, 730.096]}
-                      scale={100}
-                    />
-                    <group
-                      name="Object_107"
-                      position={[0, 3149.698, 1228.312]}
-                      scale={100}
-                    />
-                    <group
-                      name="Object_109"
-                      position={[0, 3344.724, 849.988]}
-                      scale={100}
-                    />
-                  </group>
-                </group>
-                <group
-                  name="crosshair"
-                  position={[0, 3400.021, 3650.835]}
-                  rotation={[-Math.PI, 0, 0]}
-                  scale={100}
-                >
-                  <mesh
-                    name="crosshair_crosshair_0"
-                    castShadow
-                    receiveShadow
-                    geometry={nodes.crosshair_crosshair_0.geometry}
-                    material={materials.crosshair}
-                  />
-                </group>
-                <group
-                  name="Trigger_Part_LP"
-                  position={[0, 3344.724, 849.988]}
-                  scale={100}
-                >
-                  <group
-                    name="Trigger_Part_LP001"
-                    position={[0, 3624.28, 730.096]}
-                    scale={100}
-                  />
-                  <group
-                    name="Trigger_Part_LP002"
-                    position={[0, 3149.698, 1228.312]}
-                    scale={100}
-                  />
-                </group>
-              </group>
+            name="hardknuckle"
+            rotation={[-Math.PI / 2, 0, 0]}
+            scale={100}
+          />
+          <group name="Armature" rotation={[-Math.PI / 2, 0, 0]} scale={1142.4}>
+            <group name="Object_9">
+              <primitive object={nodes._rootJoint} />
+              <skinnedMesh
+                name="Object_12"
+                geometry={nodes.Object_12.geometry}
+                material={materials.sleeve_st6_generalist}
+                skeleton={nodes.Object_12.skeleton}
+              />
+              <skinnedMesh
+                name="Object_14"
+                geometry={nodes.Object_14.geometry}
+                material={materials.glove_hardknuckle}
+                skeleton={nodes.Object_14.skeleton}
+              />
+              <skinnedMesh
+                name="Object_106"
+                geometry={nodes.Object_106.geometry}
+                material={materials.lambert1}
+                skeleton={nodes.Object_106.skeleton}
+              />
+              <skinnedMesh
+                name="Object_108"
+                geometry={nodes.Object_108.geometry}
+                material={materials.lambert1}
+                skeleton={nodes.Object_108.skeleton}
+              />
+              <skinnedMesh
+                name="Object_110"
+                geometry={nodes.Object_110.geometry}
+                material={materials.lambert1}
+                skeleton={nodes.Object_110.skeleton}
+              />
+              <group
+                name="Object_11"
+                rotation={[-Math.PI / 2, 0, 0]}
+                scale={100}
+              />
+              <group
+                name="Object_13"
+                rotation={[-Math.PI / 2, 0, 0]}
+                scale={100}
+              />
+              <group
+                name="Object_105"
+                position={[0, 3624.28, 730.096]}
+                scale={100}
+              />
+              <group
+                name="Object_107"
+                position={[0, 3149.698, 1228.312]}
+                scale={100}
+              />
+              <group
+                name="Object_109"
+                position={[0, 3344.724, 849.988]}
+                scale={100}
+              />
             </group>
+          </group>
+          {/* <group
+            ref={crosshair}
+            name="crosshair"
+            position={[0, 3400.021, 3650.835]}
+            rotation={[-Math.PI, 0, 0]}
+            scale={100}
+          >
+            <mesh
+              name="crosshair_crosshair_0"
+              castShadow
+              receiveShadow
+              geometry={nodes.crosshair_crosshair_0.geometry}
+              material={materials.crosshair}
+            />
+          </group> */}
+          <group
+            name="Trigger_Part_LP"
+            position={[0, 3344.724, 849.988]}
+            scale={100}
+          >
+            <group
+              name="Trigger_Part_LP001"
+              position={[0, 3624.28, 730.096]}
+              scale={100}
+            />
+            <group
+              name="Trigger_Part_LP002"
+              position={[0, 3149.698, 1228.312]}
+              scale={100}
+            />
           </group>
         </group>
       </group>
-    </group>
+    </RigidBody>
   )
 }
 
